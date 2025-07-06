@@ -14,6 +14,12 @@ public class BaseTest {
         driver.manage().window().maximize();
     }
 
+    public void initializeDriver() {
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
+    }
+
+
     @AfterClass
     public void tearDown() {
         if (driver != null) {

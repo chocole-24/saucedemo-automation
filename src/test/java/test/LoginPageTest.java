@@ -2,23 +2,29 @@ package test;
 
 import base.BaseTest;
 import config.ConfigReader;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.LoginPage;
 
+import static org.testng.Assert.*;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 public class LoginPageTest extends BaseTest {
-    private String baseUrl = ConfigReader.get("baseUrl");
-    private String username = ConfigReader.get("username");
-    private String password = ConfigReader.get("password");
+    private String username;
+    private String password;
+    private LoginPage loginPage;
+
+    @BeforeMethod
+    public void setUp() {
+        initializeDriver();
+        String baseUrl = ConfigReader.get("baseUrl");
+        username = ConfigReader.get("username");
+        password = ConfigReader.get("password");
+        driver.get(baseUrl);
+        loginPage = new LoginPage(driver);
+    }
 
     @Test
     public void testValidLogin() {
-        driver.get(baseUrl);
-        LoginPage loginPage = new LoginPage(driver);
         loginPage.login(username, password);
 
         // Verify that browser process to Inventory page
@@ -26,44 +32,30 @@ public class LoginPageTest extends BaseTest {
     }
 
     @Test
-    public void testInValidLogin() {
-        driver.get(baseUrl);
-        LoginPage loginPage = new LoginPage(driver);
+    public void testInvalidLogin() {
         loginPage.login("wrg_user", "wrg_pwd");
 
-        WebElement error = driver.findElement(By.cssSelector("[data-test=error]"));
-        assertTrue(error.getText().contains("Username and password do not match"));
+        assertEquals(loginPage.getErrorMessage().getText(),"Epic sadface: Username and password do not match any user in this service");
     }
 
     @Test
-    public void testInValidUsername() {
-        driver.get(baseUrl);
-        LoginPage loginPage = new LoginPage(driver);
+    public void testInvalidUsername() {
         loginPage.login("wrg_user", password);
 
-        WebElement error = driver.findElement(By.cssSelector("[data-test=error]"));
-        assertTrue(error.getText().contains("Username and password do not match"));
+        assertEquals(loginPage.getErrorMessage().getText(),"Epic sadface: Username and password do not match any user in this service");
     }
 
     @Test
-    public void testInValidPassword() {
-        driver.get(baseUrl);
-        LoginPage loginPage = new LoginPage(driver);
+    public void testInvalidPassword() {
         loginPage.login(username, "wrg_pwd");
 
-        WebElement error = driver.findElement(By.cssSelector("[data-test=error]"));
-        assertTrue(error.getText().contains("Username and password do not match"));
+        assertEquals(loginPage.getErrorMessage().getText(),"Epic sadface: Username and password do not match any user in this service");
     }
 
     @Test
     public void testLockedUser() {
-        driver.get(baseUrl);
-        LoginPage loginPage = new LoginPage(driver);
         loginPage.login(ConfigReader.get("lockedUser"), password);
 
-        WebElement error = driver.findElement(By.cssSelector("[data-test=error]"));
-        assertTrue(error.getText().contains("Sorry, this user has been locked out"));
+        assertEquals(loginPage.getErrorMessage().getText(),"Epic sadface: Sorry, this user has been locked out.");
     }
-
-
 }
